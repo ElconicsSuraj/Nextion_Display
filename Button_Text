@@ -1,0 +1,57 @@
+#include <Nextion.h>
+#include <HardwareSerial.h>
+// Initialize LED pin
+const int ledPin = 2;
+
+// Initialize Nextion display
+HardwareSerial mySerial(2); // Use UART2
+NexButton b0 = NexButton(1, 1, "b0"); // Page 1, Button B0, ID 1
+NexText t0 = NexText(1, 2, "tState"); // Page 1, Text t0, ID 2
+
+NexTouch *nex_listen_list[] = {
+    &b0,
+    NULL
+};
+  int status = 11;
+// Callback function for button release event
+void b0PopCallback(void *ptr) {
+
+  if (status==11)
+  {
+  digitalWrite(ledPin, HIGH); // Turn on the LED
+  Serial.println("LED On");
+  t0.setText("ON"); // Update t0 text
+  status =12;
+  }
+  else if (status == 12)
+  {
+   digitalWrite(ledPin, LOW); // Turn on the LED
+  Serial.println("LED OFF");
+  t0.setText("OFF"); // Update t0 text
+  status =11; 
+    
+    }
+}
+
+void setup() {
+  // Initialize LED pin
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
+
+  // Initialize Serial communication
+  Serial.begin(115200);
+mySerial.begin(9600, SERIAL_8N1, 16, 17); // UART2 with pins 5 (RX) and 17 (TX)
+
+  // Initialize Nextion display
+  nexInit();
+
+  // Attach the button events
+  b0.attachPop(b0PopCallback);
+
+  // Debugging message
+  Serial.println("Setup completed");
+}
+
+void loop() {
+  nexLoop(nex_listen_list);
+}
